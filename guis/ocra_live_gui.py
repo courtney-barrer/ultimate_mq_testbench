@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ORCA-Fusion BT live viewer using the user's patched pylablib DCAM backend.
+"""ORCA-Fusion BT live viewer using the  patched pylablib DCAM backend.
 
 Install GUI dependencies into your EXISTING camera environment:
     python -m pip install PyQt5 pyqtgraph astropy

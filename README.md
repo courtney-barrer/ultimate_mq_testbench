@@ -1,1 +1,6 @@
 useful script and programs for controlling, characterising and analysing the cameras, image acquisition system, and GLAO test bench at Macquarie for Subaru-Utlimate project. 
+
+install:
+```
+>./install.sh
+```
