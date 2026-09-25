@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prompted dark/flat tests. Run beside take_darks.py: python measure_camera_specs.py
+"""Prompted dark/flat tests. From repo root: python dcs/scripts/measure_camera_specs.py
 Edit the simple settings below. Flat source brightness is adjusted manually.
 """
 import argparse
@@ -12,7 +12,10 @@ import sys
 import time
 import numpy as np
 from astropy.io import fits
-from take_darks import add_settings, write_fits, utc_text, ascii_text, DCAM_LIBRARY_DIR
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_SPECS = REPO_ROOT / 'dcs' / 'spec_data' / 'camera_specs_snapshot.json'
+DATA_DIR = REPO_ROOT / 'data'
+DCAM_LIBRARY_DIR = '/usr/local/lib'
 
 DARK_FRAMES = 100
 FRAMES_PER_FILE = 10             # Even, keeps 2048-square cubes manageable in RAM
@@ -21,6 +24,61 @@ FLAT_TARGETS_ADU = [1000, 3000, 7000, 12000, 20000, 30000]  # Signal above dark
 NOTES = ''                      # Optional environment/source notes; no terminal prompt
 CLOCK_SYNC = 'unknown'           # Optional host clock status
 RAW_CEILING_ADU = 50000          # Conservative test ceiling, NOT measured full well
+
+
+def utc_text(unix_ns):
+    """UTC string without converting the large nanosecond timestamp to float."""
+    seconds, nanos = divmod(int(unix_ns), 1_000_000_000)
+    return datetime.fromtimestamp(seconds, timezone.utc).strftime('%Y-%m-%dT%H:%M:%S') + f'.{nanos:09d}'
+
+
+def ascii_text(value):
+    return str(value).encode('ascii', errors='backslashreplace').decode('ascii')
+
+
+def add_settings(header, properties, prefix='DCAM'):
+    """Store readable DCAM properties as long FITS HIERARCH keywords."""
+    if hasattr(properties, 'as_dict'):
+        properties = properties.as_dict('flat')
+    for name, value in properties.items():
+        key = f'{prefix} {ascii_text(name)}'
+        if isinstance(value, dict):
+            add_settings(header, value, key)
+            continue
+        if isinstance(value, np.generic):
+            value = value.item()
+        if not isinstance(value, (str, int, float, bool)) or isinstance(value, str):
+            value = ascii_text(value)
+        if isinstance(value, float) and not np.isfinite(value):
+            value = str(value)
+        header[f'HIERARCH {key}'] = value
+
+
+def write_fits(path, cube, rows, header):
+    """rows: cube index, host Unix bounds, host monotonic bounds, raw DCAM info."""
+    columns = []
+    definitions = [
+        ('FRAME', None), ('HOST_PRE_NS', 'ns'), ('HOST_POST_NS', 'ns'),
+        ('MONO_PRE_NS', 'ns'), ('MONO_POST_NS', 'ns'), ('DCAM_US', 'us'),
+        ('FRAME_INDEX', None), ('FRAMESTAMP', None), ('CAMERASTAMP', None),
+    ]
+    values = np.asarray(rows, dtype=np.int64)
+    for i, (name, unit) in enumerate(definitions):
+        columns.append(fits.Column(name=name, format='K', unit=unit, array=values[:, i]))
+    timing = fits.BinTableHDU.from_columns(columns, name='TIMING')
+    timing.header['HOSTCLK'] = 'CLOCK_REALTIME'
+    timing.header['HOSTEPOC'] = '1970-01-01T00:00:00 UTC'
+    timing.header['MONOCLK'] = 'CLOCK_MONOTONIC'
+    timing.header['CAMEPOCH'] = ('UNVERIFIED', 'DCAM timestamp epoch; not assumed Unix')
+    timing.header['COMMENT'] = 'FRAME is zero-based and indexes the primary image cube.'
+    timing.header['COMMENT'] = 'HOST_PRE/POST_NS bracket grab(1); not exposure start/end.'
+    timing.header['COMMENT'] = 'MONO bounds measure elapsed time independently of wall clock steps.'
+    timing.header['COMMENT'] = 'DCAM_US is raw SDK timestamp_us, with unverified event semantics.'
+    timing.header['COMMENT'] = 'Each frame is a separate grab; camera counters/times may reset.'
+    timing.header['COMMENT'] = 'Integer nanosecond storage does not imply nanosecond accuracy.'
+    # Astropy preserves uint16 values via the standard FITS BZERO convention.
+    hdus = fits.HDUList([fits.PrimaryHDU(cube, header=header), timing])
+    hdus.writeto(path, overwrite=False, checksum=True)
 
 
 def save_json(path, obj):
@@ -121,7 +179,7 @@ def main():
     p.add_argument('--device-index',type=int,default=0)
     p.add_argument('--mode',choices=['all','ultra_quiet','standard','fast'],default='all')
     p.add_argument('--dark-only',action='store_true')
-    p.add_argument('--specs',type=Path,default=Path(__file__).with_name('camera_specs.json'))
+    p.add_argument('--specs',type=Path,default=DEFAULT_SPECS)
     a=p.parse_args()
     document=json.loads(a.specs.read_text()); ref=document['cameras'][a.camera]
     if not ref.get('serial') or not ref.get('modes'):
@@ -143,7 +201,7 @@ def main():
         confirm('Confirm AIR cooling only, no liquid cooling, stable camera temperature, and the correct camera label')
         notes=NOTES
         clocks=CLOCK_SYNC
-        root=Path(__file__).resolve().parent/'spec_tests'/a.camera/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S_%fZ')
+        root=DATA_DIR/'spec_tests'/a.camera/datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S_%fZ')
         root.mkdir(parents=True,exist_ok=False)
         save_json(root/'camera_specs_snapshot.json',document)
         manifest={'status':'running','camera':a.camera,'reference':ref,'notes':notes,'clock_sync':clocks,

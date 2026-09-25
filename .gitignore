@@ -26,3 +26,5 @@ spec_tests/*/20*  # Ignores timestamped output folders
 .DS_Store?
 ._*
 Thumbs.db
+# Local acquisition runs (including JSON metadata)
+/data/

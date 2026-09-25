@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Compare prompted dark/flat measurements with the saved per-camera references.
-Run: python analyse_camera_specs.py spec_tests/camera_1/RUN_DIRECTORY
+Run from repo root: python dcs/scripts/analyse_camera_specs.py data/spec_tests/camera_1/RUN_DIRECTORY
 """
 import argparse
 import csv
