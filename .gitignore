@@ -1,0 +1,28 @@
+# Virtual Environments
+.venv/
+venv/
+env/
+
+# Python Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Camera Testbench Data & Outputs
+*.fits
+*.npz
+*.csv
+*.png
+spec_tests/*/20*  # Ignores timestamped output folders
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db

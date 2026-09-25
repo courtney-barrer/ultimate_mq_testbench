@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "description": "Per-camera reference values supplied by the user; counts mean ADU. Not manufacturer acceptance limits.",
+  "cameras": {
+    "camera_1": {
+      "label": "Camera 1",
+      "serial": "503524",
+      "serial_source": "503524",
+      "model": "C15440-20UP",
+      "spec_source": "User-provided camera 1 specification sheet values",
+      "conditions": {
+        "trigger": "internal",
+        "cooling": "air only",
+        "roi_width": 2048,
+        "roi_height": 2048,
+        "pixel_correction": "off",
+        "binning": 1,
+        "roi_position": "centred for these tests; sheet position not supplied",
+        "output_bits": 16,
+        "output_bits_source": "Test choice; not supplied as a sheet condition"
+      },
+      "modes": {
+        "ultra_quiet": {
+          "read_noise_e_rms": 0.7,
+          "gain_e_per_adu": 0.23,
+          "exposure_s": 0.00028
+        },
+        "standard": {
+          "read_noise_e_rms": 0.95,
+          "gain_e_per_adu": 0.25,
+          "exposure_s": 6.5e-05
+        },
+        "fast": {
+          "read_noise_e_rms": 1.48,
+          "gain_e_per_adu": 0.24,
+          "exposure_s": 1.7e-05
+        }
+      },
+      "acceptance_tolerances": null
+    },
+    "camera_2": {
+      "label": "Camera 2",
+      "serial": "503340",
+      "serial_source": "503340",
+      "model": "C15440-20UP",
+      "spec_source": "User-provided camera 2 specification sheet values",
+      "conditions": {
+        "trigger": "internal",
+        "cooling": "air only",
+        "roi_width": 2048,
+        "roi_height": 2048,
+        "pixel_correction": "off",
+        "binning": 1,
+        "roi_position": "centred for these tests; sheet position not supplied",
+        "output_bits": 16,
+        "output_bits_source": "Test choice; not supplied as a sheet condition"
+      },
+      "modes": {
+        "ultra_quiet": {
+          "read_noise_e_rms": 0.72,
+          "gain_e_per_adu": 0.22,
+          "exposure_s": 0.00028
+        },
+        "standard": {
+          "read_noise_e_rms": 0.85,
+          "gain_e_per_adu": 0.21,
+          "exposure_s": 6.5e-05
+        },
+        "fast": {
+          "read_noise_e_rms": 1.33,
+          "gain_e_per_adu": 0.22,
+          "exposure_s": 1.7e-05
+        }
+      },
+      "acceptance_tolerances": null
+    },
+    "camera_3": {
+      "label": "Camera 3",
+      "serial": null,
+      "model": null,
+      "conditions": null,
+      "modes": null,
+      "acceptance_tolerances": null
+    },
+    "camera_4": {
+      "label": "Camera 4",
+      "serial": null,
+      "model": null,
+      "conditions": null,
+      "modes": null,
+      "acceptance_tolerances": null
+    },
+    "camera_5": {
+      "label": "Camera 5",
+      "serial": null,
+      "model": null,
+      "conditions": null,
+      "modes": null,
+      "acceptance_tolerances": null
+    },
+    "camera_6": {
+      "label": "Camera 6",
+      "serial": null,
+      "model": null,
+      "conditions": null,
+      "modes": null,
+      "acceptance_tolerances": null
+    },
+    "camera_7": {
+      "label": "Camera 7",
+      "serial": null,
+      "model": null,
+      "conditions": null,
+      "modes": null,
+      "acceptance_tolerances": null
+    },
+    "camera_8": {
+      "label": "Camera 8",
+      "serial": null,
+      "model": null,
+      "conditions": null,
+      "modes": null,
+      "acceptance_tolerances": null
+    }
+  }
+}
