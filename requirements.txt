@@ -4,3 +4,7 @@ numpy==2.5.2
 pylablib==1.4.5
 PyQt5==5.15.11
 pyqtgraph==0.14.0
+pyserial>=3.5,<4
+pyzmq>=25,<28
+pyglet==2.1.19
+pytest==9.1.1
