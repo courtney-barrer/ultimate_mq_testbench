@@ -270,4 +270,10 @@ class SLM:
         self._conn.close()
         if self._shm is not None:
             self._shm.close()
-            self._shm.unlink()
+            try:
+                self._shm.unlink()
+            except FileNotFoundError:
+                # Another process may already have removed it. Failed unlink()
+                # does not unregister Python's tracker; release our ownership.
+                from multiprocessing import resource_tracker
+                resource_tracker.unregister(self._shm._name, 'shared_memory')

@@ -16,6 +16,19 @@ import numpy as np
 
 from . import _protocol as P
 
+
+def _attach_shared_memory(name):
+    """Parent owns/unlinks the buffer; this independently launched worker borrows it."""
+    if sys.version_info >= (3, 13):
+        return SharedMemory(name=name, track=False)
+    # This worker is subprocess.Popen/exec, not a multiprocessing child sharing
+    # its parent's tracker. Do not apply this workaround to shared-tracker children.
+    from multiprocessing import resource_tracker
+    shm = SharedMemory(name=name)
+    resource_tracker.unregister(shm._name, 'shared_memory')
+    return shm
+
+
 # Imported once pyglet's options are set (see _import_pyglet).
 _x11 = None
 
@@ -286,7 +299,7 @@ def display_main(conn, screen, neutral_output):
         conn.send((P.READY, info))
         tag, shm_name = conn.recv()
         assert tag == P.ATTACH, tag
-        shm = SharedMemory(name=shm_name) #, track=False) # use track for python3.13, not for 3.12
+        shm = _attach_shared_memory(shm_name)
     except (EOFError, BrokenPipeError, ConnectionResetError):
         renderer.close()
         return
